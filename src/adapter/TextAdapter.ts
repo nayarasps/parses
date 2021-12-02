@@ -1,4 +1,4 @@
-import {Model} from "../model/Model";
+import {Model, Type} from "../model/Model";
 
 import {ParseStrategy} from "../strategy/ParseStrategy";
 import {ParseBinaryStrategy} from "../strategy/ParseBinaryStrategy";
@@ -7,7 +7,7 @@ import {ParseHexStrategy} from "../strategy/ParseHexStrategy";
 import {ParseOctalStrategy} from "../strategy/ParseOctalStrategy";
 
 
-let parsers: Array<Object>;
+let parsers: Array<ParseStrategy>;
 
 let parseBinary = new ParseBinaryStrategy();
 let parseDecimal = new ParseDecimalStrategy();
@@ -16,7 +16,7 @@ let parseOctal = new ParseOctalStrategy();
 
 
 function init() {
-    parsers = new Array<Object>();
+    parsers = new Array<ParseStrategy>();
     parsers.push(parseBinary);
     parsers.push(parseDecimal);
     parsers.push(parseHex);
@@ -26,39 +26,45 @@ function init() {
 function convert(data: string, type: string): string {
 
     switch (type){
-        case "text":
+        case Type.TEXT:
             return data
-        case "hex":
+        case Type.HEXADECIMAL:
             parsers = parsers.filter(item => item !== parseHex)
             return parseHex.parseToText(data);
-        case "decimal:":
-            parsers = parsers.filter(item => item !== parseDecimal)
+        case Type.DECIMAL:
+            parsers = parsers.filter(item => item !== parseDecimal);
             return parseDecimal.parseToText(data);
-        case "binary":
+        case Type.BINARY:
             parsers = parsers.filter(item => item !== parseBinary)
-            return parseBinary.parseToText(data);
-        case "octal":
+            return parseBinary.parseToText(data)
+        case Type.OCTAL:
             parsers = parsers.filter(item => item !== parseOctal)
             return parseOctal.parseToText(data);
         default:
-            return ''
+            console.log('Type of format not available');
+            return '';
         }
 
     }
 
-function parseModel(parse: ParseStrategy, data: string) {
+function parseToModel(parse: ParseStrategy, data: string) {
     let parsed: string = parse.parse(data);
     return new Model(parsed, parse.type);
 }
 
 
-export function End(data: string, type: string) {
+export function convertAllTypes(data: string, type: string) {
     init()
+
     let text: string = convert(data, type);
     let converted:Array<Model> = new Array<Model>();
 
+    if (type !== "text") {
+        converted.push(new Model(text, "text"));
+    }
+
     parsers.forEach((element: any) => {
-        converted.push(parseModel(element, text));
+        converted.push(parseToModel(element, text));
     })
 
     return converted;

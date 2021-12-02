@@ -1,3 +1,11 @@
+export enum Type {
+    TEXT = "text",
+    DECIMAL = "decimal",
+    HEXADECIMAL = "hex",
+    BINARY = "binary",
+    OCTAL = "octal"
+
+}
 
 export class Model {
 
@@ -8,9 +16,6 @@ export class Model {
         this.data = data;
         this.type = type;
     }
-
-    getData() { return this.data}
-    getType() { return this.type}
 }
 
 
